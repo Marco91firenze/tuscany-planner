@@ -13,6 +13,9 @@
     "db:migrate": "turbo run db:migrate",
     "db:studio": "turbo run db:studio"
   },
+  "dependencies": {
+    "next": "^15.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "eslint": "^8.55.0",
