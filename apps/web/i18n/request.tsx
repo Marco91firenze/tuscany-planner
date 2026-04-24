@@ -1,6 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
-import { getDictionary } from "@tuscany/i18n";
+import { getDictionary } from "../lib/i18n";
 
 export default getRequestConfig(async ({ locale }) => ({
-  messages: await getDictionary(locale as any),
+  messages: await getDictionary(locale),
 }));
