@@ -9,7 +9,7 @@
     }
   },
   "scripts": {
-    "build": "prisma generate && tsc",
+    "build": "tsc",
     "type-check": "tsc --noEmit",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
