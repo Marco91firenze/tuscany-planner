@@ -1,43 +1,20 @@
 {
+  "name": "tuscany-planner",
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "env": {
-    "DATABASE_URL": {
-      "description": "PostgreSQL connection string"
-    },
-    "NEXT_PUBLIC_SUPABASE_URL": {
-      "description": "Supabase project URL"
-    },
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": {
-      "description": "Supabase anonymous key"
-    },
-    "SUPABASE_SERVICE_ROLE_KEY": {
-      "description": "Supabase service role key (secret)"
-    },
-    "NEXT_PUBLIC_SANITY_PROJECT_ID": {
-      "description": "Sanity project ID"
-    },
-    "NEXT_PUBLIC_SANITY_DATASET": {
-      "description": "Sanity dataset (usually 'production')"
-    },
-    "SANITY_API_TOKEN": {
-      "description": "Sanity API token (secret)"
-    },
-    "RESEND_API_KEY": {
-      "description": "Resend email service API key (secret)"
-    },
-    "NEXT_PUBLIC_POSTHOG_KEY": {
-      "description": "PostHog analytics API key"
-    },
-    "NEXT_PUBLIC_SENTRY_DSN": {
-      "description": "Sentry error tracking DSN"
-    },
-    "NEXT_PUBLIC_MAPTILER_KEY": {
-      "description": "MapTiler API key"
-    },
-    "SESSION_SECRET": {
-      "description": "Secure session secret (secret)"
-    }
-  }
+  "env": [
+    "DATABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "NEXT_PUBLIC_SANITY_PROJECT_ID",
+    "NEXT_PUBLIC_SANITY_DATASET",
+    "SANITY_API_TOKEN",
+    "RESEND_API_KEY",
+    "NEXT_PUBLIC_POSTHOG_KEY",
+    "NEXT_PUBLIC_BUGSNAG_KEY",
+    "NEXT_PUBLIC_MAPTILER_KEY",
+    "SESSION_SECRET"
+  ]
 }
