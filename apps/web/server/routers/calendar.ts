@@ -1,6 +1,6 @@
 import { router, procedure } from '../trpc';
 import { prisma } from '../../lib/prisma';
-import { checkParticipantConflict, checkPerkState } from '@tuscany/core';
+import { checkParticipantConflict, checkPerkState } from '../../lib/core';
 import { z } from 'zod';
 
 const SlotEnum = z.enum(['MORNING', 'AFTERNOON', 'EVENING', 'FULL_DAY']);
