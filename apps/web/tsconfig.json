@@ -3,6 +3,9 @@
   "compilerOptions": {
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
+    "paths": {
+      "@tuscany/*": ["../../packages/*/src"]
+    },
     "plugins": [
       {
         "name": "next"
