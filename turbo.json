@@ -5,6 +5,10 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "dist/**"]
     },
+    "web#build": {
+      "dependsOn": ["@tuscany/core#build", "@tuscany/db#build", "@tuscany/i18n#build", "@tuscany/ui-tokens#build", "^build"],
+      "outputs": [".next/**"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
