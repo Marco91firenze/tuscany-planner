@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id            String   @id @default(cuid())
+  sessionToken  String   @unique
+  checkIn       DateTime
+  checkOut      DateTime
+  partySize     Int
+  language      String   @default("en")
+  hotelName     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  items         ItineraryItem[]
+  inquiry       Inquiry?
+}
+
+model Experience {
+  id              String   @id
+  slug            String   @unique
+  isActive        Boolean  @default(true)
+  durationClass   String
+  defaultSlot     String?
+  minParticipants Int
+  maxParticipants Int
+  category        String
+  seasonality     Json?
+  availabilityRules Json  @default("{}")
+  blockedDates    DateTime[]
+  createdAt       DateTime @default(now())
+  items           ItineraryItem[]
+}
+
+model ItineraryItem {
+  id            String   @id @default(cuid())
+  tripId        String
+  experienceId  String
+  date          DateTime
+  slot          String
+  participants  Int
+  createdAt     DateTime @default(now())
+  trip          Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  experience    Experience @relation(fields: [experienceId], references: [id])
+  @@index([tripId, date, slot])
+}
+
+model Inquiry {
+  id            String   @id @default(cuid())
+  tripId        String   @unique
+  contactName   String
+  contactEmail  String
+  contactPhone  String?
+  specialNotes  String?
+  status        String   @default("NEW")
+  perkUnlocked  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  events        InquiryEvent[]
+}
+
+model InquiryEvent {
+  id         String   @id @default(cuid())
+  inquiryId  String
+  type       String
+  payload    Json
+  createdAt  DateTime @default(now())
+  inquiry    Inquiry  @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("SALES")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

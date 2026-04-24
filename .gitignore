@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.env.local
+.env.*.local
+.DS_Store
+*.log
+.turbo
+.code-review-graph
+.vscode
+.idea
+coverage
+.vercel
+.prisma
