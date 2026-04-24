@@ -27,7 +27,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cookies-next": "^4.1.1",
-    "dnd-kit": "^7.0.1",
+    "@dnd-kit/core": "^6.0.8",
     "framer-motion": "^10.16.16",
     "geist": "^1.3.0",
     "jose": "^5.0.1",
