@@ -5,7 +5,7 @@ export default function LocaleLayout({
   params,
 }: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
   return (
     <div>
