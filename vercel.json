@@ -1,7 +1,6 @@
 {
-  "name": "tuscany-planner",
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "env": {
     "DATABASE_URL": "",
