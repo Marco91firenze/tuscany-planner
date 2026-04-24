@@ -1,13 +1,15 @@
 import { router, procedure } from '../trpc';
-import { prisma } from '@tuscany/db';
+import { prisma } from '../../lib/prisma';
 import { checkParticipantConflict, checkPerkState } from '@tuscany/core';
 import { z } from 'zod';
+
+const SlotEnum = z.enum(['MORNING', 'AFTERNOON', 'EVENING', 'FULL_DAY']);
 
 const AddItemInput = z.object({
   tripId: z.string(),
   experienceId: z.string(),
   date: z.date(),
-  slot: z.string(),
+  slot: SlotEnum,
   participants: z.number().min(1),
 });
 

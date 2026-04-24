@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import { Geist } from 'geist/font';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={Geist.className}>
+      <body>
         <div className="min-h-screen flex flex-col bg-white">
           {children}
         </div>

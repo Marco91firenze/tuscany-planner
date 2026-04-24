@@ -7,6 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum DurationClass {
+  HALF_DAY
+  FULL_DAY
+  EVENING
+  FLEXIBLE
+  MULTI_DAY
+}
+
+enum Slot {
+  MORNING
+  AFTERNOON
+  EVENING
+  FULL_DAY
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  WON
+  LOST
+}
+
 model Trip {
   id            String   @id @default(cuid())
   sessionToken  String   @unique
@@ -25,8 +48,8 @@ model Experience {
   id              String   @id
   slug            String   @unique
   isActive        Boolean  @default(true)
-  durationClass   String
-  defaultSlot     String?
+  durationClass   DurationClass
+  defaultSlot     Slot?
   minParticipants Int
   maxParticipants Int
   category        String
@@ -42,7 +65,7 @@ model ItineraryItem {
   tripId        String
   experienceId  String
   date          DateTime
-  slot          String
+  slot          Slot
   participants  Int
   createdAt     DateTime @default(now())
   trip          Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -57,7 +80,7 @@ model Inquiry {
   contactEmail  String
   contactPhone  String?
   specialNotes  String?
-  status        String   @default("NEW")
+  status        InquiryStatus @default(NEW)
   perkUnlocked  Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

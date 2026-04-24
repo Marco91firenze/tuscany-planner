@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev"
   },
   "dependencies": {
+    "@prisma/client": "^5.8.0",
     "@tuscany/core": "workspace:*",
     "@tuscany/db": "workspace:*",
     "@tuscany/i18n": "workspace:*",
@@ -45,6 +46,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "prisma": "^5.8.0",
     "@next/eslint-plugin-next": "^15.0.0",
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.42",

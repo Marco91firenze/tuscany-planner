@@ -42,6 +42,9 @@ importers:
       sanity:
         specifier: ^3.45.0
         version: 3.99.0(@emotion/is-prop-valid@1.4.0)(@types/node@20.19.39)(@types/react@18.3.28)(immer@10.2.0)(jiti@2.6.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(styled-components@6.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(yaml@2.8.3)
+      styled-components:
+        specifier: ^6.4.1
+        version: 6.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@sanity/cli':
         specifier: ^3.45.0
@@ -58,6 +61,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.10.0(react-hook-form@7.73.1(react@19.2.5))
+      '@prisma/client':
+        specifier: ^5.8.0
+        version: 5.22.0(prisma@5.22.0)
       '@sentry/nextjs':
         specifier: ^7.100.0
         version: 7.120.4(next@15.5.15(@opentelemetry/api@1.9.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
@@ -167,6 +173,9 @@ importers:
       postcss:
         specifier: ^8.4.32
         version: 8.5.10
+      prisma:
+        specifier: ^5.8.0
+        version: 5.22.0
       tailwindcss:
         specifier: ^3.3.7
         version: 3.4.19(yaml@2.8.3)

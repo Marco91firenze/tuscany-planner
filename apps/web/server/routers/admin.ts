@@ -1,11 +1,13 @@
 import { router, procedure } from '../trpc';
-import { prisma } from '@tuscany/db';
+import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
+
+const InquiryStatusEnum = z.enum(['NEW', 'CONTACTED', 'QUOTED', 'WON', 'LOST']);
 
 export const adminRouter = router({
   inquiries: router({
     list: procedure
-      .input(z.object({ status: z.string().optional(), limit: z.number().default(50) }))
+      .input(z.object({ status: InquiryStatusEnum.optional(), limit: z.number().default(50) }))
       .query(async ({ input }) => {
         return prisma.inquiry.findMany({
           where: input.status ? { status: input.status } : undefined,
@@ -16,7 +18,7 @@ export const adminRouter = router({
       }),
 
     updateStatus: procedure
-      .input(z.object({ id: z.string(), status: z.string() }))
+      .input(z.object({ id: z.string(), status: InquiryStatusEnum }))
       .mutation(async ({ input }) => {
         return prisma.inquiry.update({
           where: { id: input.id },

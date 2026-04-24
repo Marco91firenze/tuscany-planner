@@ -1,5 +1,5 @@
 import { router, procedure } from '../trpc';
-import { prisma } from '@tuscany/db';
+import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 
 const TripCreateInput = z.object({
