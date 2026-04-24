@@ -11,7 +11,7 @@
     "noUnusedParameters": false,
     "paths": {
       "@tuscany/*": [
-        "../../packages/*/dist"
+        "../../packages/*/src"
       ]
     },
     "plugins": [

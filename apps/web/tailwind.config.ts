@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { colors } from '../../packages/ui-tokens/dist';
+import { colors } from '../../packages/ui-tokens/src';
 
 const config: Config = {
   content: ['./app/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
