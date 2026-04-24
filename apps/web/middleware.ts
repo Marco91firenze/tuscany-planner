@@ -1,8 +1,9 @@
 import createIntlMiddleware from 'next-intl/middleware';
-import { LOCALES } from '@tuscany/i18n';
+
+const LOCALES = ['en', 'it', 'fr', 'de', 'es', 'pt', 'ru', 'zh', 'ja'] as const;
 
 export default createIntlMiddleware({
-  locales: LOCALES,
+  locales: LOCALES as unknown as string[],
   defaultLocale: 'en',
 });
 
