@@ -19,14 +19,4 @@ export default withNextIntl({
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@tuscany/core': require.resolve('../../packages/core/src/index.ts'),
-      '@tuscany/db': require.resolve('../../packages/db/src/index.ts'),
-      '@tuscany/i18n': require.resolve('../../packages/i18n/src/index.ts'),
-      '@tuscany/ui-tokens': require.resolve('../../packages/ui-tokens/src/index.ts'),
-    };
-    return config;
-  },
 });
