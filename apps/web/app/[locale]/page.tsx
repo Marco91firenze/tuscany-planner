@@ -15,8 +15,21 @@ export default function LandingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const checkIn = new Date(formData.checkIn);
-    const checkOut = new Date(formData.checkOut);
+
+    // Validate form data
+    if (!formData.checkIn || !formData.checkOut) {
+      alert('Please select check-in and check-out dates');
+      return;
+    }
+
+    const checkIn = new Date(formData.checkIn + 'T00:00:00Z');
+    const checkOut = new Date(formData.checkOut + 'T00:00:00Z');
+
+    // Validate dates were parsed correctly
+    if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+      alert('Invalid date format. Please check your dates.');
+      return;
+    }
 
     if (checkIn >= checkOut) {
       alert('Check-out date must be after check-in date');
@@ -38,6 +51,8 @@ export default function LandingPage() {
       const data = await res.json();
       if (data.result?.data?.id) {
         router.push(`/plan/${data.result.data.id}`);
+      } else {
+        alert('Failed to create trip. Please try again.');
       }
     } catch (error) {
       console.error('Error creating trip:', error);
