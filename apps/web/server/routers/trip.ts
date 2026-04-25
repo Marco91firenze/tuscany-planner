@@ -3,8 +3,8 @@ import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 
 const TripCreateInput = z.object({
-  checkIn: z.date(),
-  checkOut: z.date(),
+  checkIn: z.string().pipe(z.coerce.date()),
+  checkOut: z.string().pipe(z.coerce.date()),
   partySize: z.number().min(1).max(20),
   language: z.string().default('en'),
   hotelName: z.string().optional(),
