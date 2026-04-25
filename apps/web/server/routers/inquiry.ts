@@ -48,13 +48,30 @@ async function sendEmail(to: string, subject: string, html: string) {
 
 export const inquiryRouter = router({
   submit: procedure.input(SubmitInquiryInput).mutation(async ({ input }) => {
-    const inquiry = await prisma.inquiry.create({
-      data: {
-        ...input,
-        status: 'NEW',
-      },
-      include: { trip: { include: { items: { include: { experience: true } } } } },
-    });
+    let inquiry;
+    try {
+      inquiry = await prisma.inquiry.create({
+        data: {
+          ...input,
+          status: 'NEW',
+        },
+        include: { trip: { include: { items: { include: { experience: true } } } } },
+      });
+    } catch (err: any) {
+      if (err?.code === 'P2002') {
+        // Duplicate inquiry for this trip
+        const e: any = new Error('Inquiry already submitted for this trip');
+        e.code = 'BAD_REQUEST';
+        throw e;
+      }
+      if (err?.code === 'P2003') {
+        // Foreign key constraint - trip doesn't exist
+        const e: any = new Error('Trip not found');
+        e.code = 'NOT_FOUND';
+        throw e;
+      }
+      throw err;
+    }
 
     // Format experiences for email
     const expSummary = inquiry.trip.items.map(

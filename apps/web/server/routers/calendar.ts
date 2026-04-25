@@ -44,9 +44,17 @@ export const calendarRouter = router({
   }),
 
   removeItem: procedure.input(z.string()).mutation(async ({ input }) => {
-    return prisma.itineraryItem.delete({
-      where: { id: input },
-    });
+    try {
+      return await prisma.itineraryItem.delete({ where: { id: input } });
+    } catch (err: any) {
+      // Record not found
+      if (err?.code === 'P2025') {
+        const e: any = new Error('Item not found');
+        e.code = 'NOT_FOUND';
+        throw e;
+      }
+      throw err;
+    }
   }),
 
   validate: procedure.input(z.string()).query(async ({ input }) => {

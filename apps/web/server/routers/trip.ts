@@ -49,9 +49,18 @@ export const tripRouter = router({
   update: procedure
     .input(z.object({ id: z.string(), data: TripBaseSchema.partial() }))
     .mutation(async ({ input }) => {
-      return prisma.trip.update({
-        where: { id: input.id },
-        data: input.data,
-      });
+      try {
+        return await prisma.trip.update({
+          where: { id: input.id },
+          data: input.data,
+        });
+      } catch (err: any) {
+        if (err?.code === 'P2025') {
+          const e: any = new Error('Trip not found');
+          e.code = 'NOT_FOUND';
+          throw e;
+        }
+        throw err;
+      }
     }),
 });
