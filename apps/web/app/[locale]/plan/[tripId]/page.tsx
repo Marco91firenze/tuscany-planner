@@ -401,16 +401,20 @@ export default function PlannerPage() {
                     onClick={() => openAddModal(exp)}
                     className="group bg-white rounded-xl border border-amber-100 overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-all duration-200 text-left"
                   >
-                    <div className="aspect-[4/3] relative overflow-hidden bg-amber-100">
+                    <div className="aspect-[4/3] relative overflow-hidden bg-gradient-to-br from-amber-100 to-orange-200">
                       {meta.image ? (
                         <img
                           src={meta.image}
                           alt={meta.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-6xl">{meta.emoji}</div>
-                      )}
+                      ) : null}
+                      <div className={`absolute inset-0 flex items-center justify-center text-6xl pointer-events-none ${meta.image ? 'opacity-0' : 'opacity-100'}`}>
+                        {meta.emoji}
+                      </div>
                       <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-full text-xs font-medium text-amber-900">
                         {exp.durationClass.replace('_', ' ')}
                       </div>
@@ -458,15 +462,22 @@ export default function PlannerPage() {
           }}
         >
           <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="aspect-video relative">
-              <img
-                src={EXPERIENCE_META[modalExp.slug]?.image || ''}
-                alt={EXPERIENCE_META[modalExp.slug]?.title || modalExp.slug}
-                className="w-full h-full object-cover rounded-t-2xl"
-              />
+            <div className="aspect-video relative bg-gradient-to-br from-amber-200 to-orange-300">
+              {EXPERIENCE_META[modalExp.slug]?.image ? (
+                <img
+                  src={EXPERIENCE_META[modalExp.slug]!.image}
+                  alt={EXPERIENCE_META[modalExp.slug]?.title || modalExp.slug}
+                  className="w-full h-full object-cover rounded-t-2xl"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-7xl">
+                  {EXPERIENCE_META[modalExp.slug]?.emoji || '🎯'}
+                </div>
+              )}
               <button
                 onClick={closeModal}
-                className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white"
+                className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white shadow-md"
+                aria-label="Close"
               >
                 ✕
               </button>
