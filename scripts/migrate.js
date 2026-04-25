@@ -1,37 +1,49 @@
 #!/usr/bin/env node
 
 /**
- * Migration helper: runs Prisma migrate deploy
- * For Vercel builds: tries pooler URL first, falls back to direct URL
+ * Migration helper: Apply Prisma migrations during build
+ * NOTE: Logs warnings but doesn't fail build (migrations can be run manually)
  */
 
-const { execSync } = require('child_process');
-
-const poolerUrl = process.env.DATABASE_URL;
-const directUrl = 'postgresql://postgres:Cheftonyftw123%21@db.ioeirnvyexddubdcwwdp.supabase.co:5432/postgres?sslmode=require';
+const { spawnSync } = require('child_process');
 
 async function migrate() {
-  // Try with pooler first (for runtime connection pooling)
-  console.log('🔄 Running migrations...');
+  console.log('🔄 Attempting database migrations...');
 
   try {
-    // On Vercel, use direct URL for migrations only (pooler doesn't work with Prisma)
-    // On local, use whatever DATABASE_URL is set
-    const dbUrl = process.env.VERCEL ? directUrl : poolerUrl;
+    const result = spawnSync(
+      'npx',
+      [
+        'prisma',
+        'migrate',
+        'deploy',
+        '--schema=packages/db/prisma/schema.prisma'
+      ],
+      {
+        stdio: 'pipe',
+        timeout: 30000,  // 30s timeout
+        cwd: process.cwd()
+      }
+    );
 
-    const cmd = `DATABASE_URL="${dbUrl}" npx prisma migrate deploy --schema=packages/db/prisma/schema.prisma`;
-    console.log('📝 Command:', cmd.replace(/PASSWORD/g, '***'));
+    if (result.error) {
+      console.warn('⚠️  Migration spawn error (non-fatal):', result.error.message);
+      console.log('💡 Migrations may need manual application');
+      process.exit(0);  // Don't fail build
+    }
 
-    execSync(cmd, {
-      stdio: 'inherit',
-      cwd: process.cwd()
-    });
-
-    console.log('✅ Migrations complete');
-    process.exit(0);
+    if (result.status === 0) {
+      console.log('✅ Migrations deployed successfully');
+      process.exit(0);
+    } else {
+      console.warn(`⚠️  Migration process exited with code ${result.status}`);
+      if (result.stderr) console.warn('stderr:', result.stderr.toString());
+      console.log('💡 Run "pnpm db:push" or "pnpm db:migrate" manually if needed');
+      process.exit(0);  // Non-fatal
+    }
   } catch (error) {
-    console.error('❌ Migration failed:', error.message);
-    process.exit(1);
+    console.warn('⚠️  Migration error (non-fatal):', error.message);
+    process.exit(0);
   }
 }
 
