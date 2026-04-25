@@ -62,7 +62,7 @@ const EXPERIENCE_META: Record<string, { title: string; description: string; imag
   'cantina-antinori': {
     title: 'Cantina Antinori Winery',
     description: 'Historic winery tour with premium wine tasting',
-    image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2e3bb6?w=800&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&auto=format&fit=crop',
     emoji: '🍷',
   },
 };
@@ -140,6 +140,17 @@ export default function PlannerPage() {
       console.error('Error fetching trip:', error);
     }
   };
+
+  // Close modal on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    if (modalOpen) {
+      window.addEventListener('keydown', onKey);
+      return () => window.removeEventListener('keydown', onKey);
+    }
+  }, [modalOpen]);
 
   useEffect(() => {
     if (!tripId) return;
@@ -443,8 +454,13 @@ export default function PlannerPage() {
 
       {/* Add Experience Modal */}
       {modalOpen && modalExp && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeModal();
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="aspect-video relative">
               <img
                 src={EXPERIENCE_META[modalExp.slug]?.image || ''}
