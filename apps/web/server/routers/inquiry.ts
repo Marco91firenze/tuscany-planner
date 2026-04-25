@@ -1,6 +1,7 @@
 import { router, procedure } from '../trpc';
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
+import { inquiryConfirmationTemplate, operatorNotificationTemplate } from '../../lib/email-templates';
 
 const SubmitInquiryInput = z.object({
   tripId: z.string(),
@@ -9,6 +10,41 @@ const SubmitInquiryInput = z.object({
   contactPhone: z.string().optional(),
   specialNotes: z.string().optional(),
 });
+
+async function sendEmail(to: string, subject: string, html: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY not set, skipping email');
+    return null;
+  }
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Florence Premium Tours <onboarding@resend.dev>',
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.text();
+      console.error('Resend error:', error);
+      return null;
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error('Email send failed:', err);
+    return null;
+  }
+}
 
 export const inquiryRouter = router({
   submit: procedure.input(SubmitInquiryInput).mutation(async ({ input }) => {
@@ -20,8 +56,41 @@ export const inquiryRouter = router({
       include: { trip: { include: { items: { include: { experience: true } } } } },
     });
 
-    // TODO: Send email via Resend
-    // TODO: Notify operator
+    // Format experiences for email
+    const expSummary = inquiry.trip.items.map(
+      (item) =>
+        `${item.experience.slug} - ${new Date(item.date).toLocaleDateString()} (${item.slot}, ${item.participants} guests)`
+    );
+
+    const checkInStr = new Date(inquiry.trip.checkIn).toLocaleDateString();
+    const checkOutStr = new Date(inquiry.trip.checkOut).toLocaleDateString();
+
+    // Send confirmation to guest
+    await sendEmail(
+      inquiry.contactEmail,
+      'Your Florence Premium Tours Itinerary',
+      inquiryConfirmationTemplate({
+        name: inquiry.contactName,
+        checkIn: checkInStr,
+        checkOut: checkOutStr,
+        experiences: expSummary,
+      })
+    );
+
+    // Notify operator
+    const operatorEmail = process.env.OPERATOR_EMAIL || 'marcorome91@gmail.com';
+    await sendEmail(
+      operatorEmail,
+      `New Inquiry: ${inquiry.contactName}`,
+      operatorNotificationTemplate({
+        name: inquiry.contactName,
+        email: inquiry.contactEmail,
+        phone: inquiry.contactPhone || '',
+        checkIn: checkInStr,
+        checkOut: checkOutStr,
+        experiences: expSummary,
+      })
+    );
 
     return inquiry;
   }),
