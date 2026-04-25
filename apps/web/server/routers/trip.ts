@@ -2,13 +2,31 @@ import { router, procedure } from '../trpc';
 import { prisma } from '../../lib/prisma';
 import { z } from 'zod';
 
-const TripCreateInput = z.object({
+// Base schema (without refinements) — used for partial updates
+const TripBaseSchema = z.object({
   checkIn: z.string().pipe(z.coerce.date()),
   checkOut: z.string().pipe(z.coerce.date()),
   partySize: z.number().min(1).max(20),
   language: z.string().default('en'),
   hotelName: z.string().optional(),
 });
+
+// Validated create input
+const TripCreateInput = TripBaseSchema
+  .refine((data) => data.checkOut > data.checkIn, {
+    message: 'Check-out must be after check-in',
+    path: ['checkOut'],
+  })
+  .refine(
+    (data) => {
+      const days = (data.checkOut.getTime() - data.checkIn.getTime()) / (1000 * 60 * 60 * 24);
+      return days <= 30;
+    },
+    {
+      message: 'Stay length cannot exceed 30 days',
+      path: ['checkOut'],
+    }
+  );
 
 export const tripRouter = router({
   create: procedure.input(TripCreateInput).mutation(async ({ input }) => {
@@ -29,7 +47,7 @@ export const tripRouter = router({
   }),
 
   update: procedure
-    .input(z.object({ id: z.string(), data: TripCreateInput.partial() }))
+    .input(z.object({ id: z.string(), data: TripBaseSchema.partial() }))
     .mutation(async ({ input }) => {
       return prisma.trip.update({
         where: { id: input.id },
