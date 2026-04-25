@@ -8,7 +8,7 @@ const SlotEnum = z.enum(['MORNING', 'AFTERNOON', 'EVENING', 'FULL_DAY']);
 const AddItemInput = z.object({
   tripId: z.string(),
   experienceId: z.string(),
-  date: z.date(),
+  date: z.string().pipe(z.coerce.date()),
   slot: SlotEnum,
   participants: z.number().min(1),
 });
