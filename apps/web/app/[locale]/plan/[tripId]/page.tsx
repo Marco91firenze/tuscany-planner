@@ -19,7 +19,11 @@ export default function PlannerPage() {
 
     const fetchTrip = async () => {
       try {
-        const res = await fetch(`/api/trpc/trip.get?input="${tripId}"`);
+        const res = await fetch('/api/trpc/trip.get', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(tripId),
+        });
         const data = await res.json();
         setTrip(data.result?.data);
       } catch (error) {
@@ -29,7 +33,11 @@ export default function PlannerPage() {
 
     const fetchExperiences = async () => {
       try {
-        const res = await fetch('/api/trpc/experience.list');
+        const res = await fetch('/api/trpc/experience.list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        });
         const data = await res.json();
         setExperiences(data.result?.data || []);
       } catch (error) {
