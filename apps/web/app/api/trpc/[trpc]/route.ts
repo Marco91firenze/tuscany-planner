@@ -1,15 +1,24 @@
 import { appRouter } from '../../../../server/routers/_app';
 
 function getStatusCode(error: any): number {
-  // Zod validation errors
-  if (error?.name === 'ZodError' || error?.code === 'BAD_REQUEST') return 400;
-  // TRPCError with explicit code
-  if (error?.code === 'NOT_FOUND') return 404;
-  if (error?.code === 'UNAUTHORIZED') return 401;
-  if (error?.code === 'FORBIDDEN') return 403;
-  // Custom thrown errors with messages we recognize
+  // Unwrap nested cause chain (tRPC wraps errors)
+  let cur = error;
+  for (let i = 0; i < 5 && cur; i++) {
+    // Zod validation errors
+    if (cur?.name === 'ZodError') return 400;
+    if (cur?.code === 'BAD_REQUEST') return 400;
+    // TRPCError with explicit code
+    if (cur?.code === 'NOT_FOUND') return 404;
+    if (cur?.code === 'UNAUTHORIZED') return 401;
+    if (cur?.code === 'FORBIDDEN') return 403;
+    cur = cur.cause;
+  }
+  // Custom thrown errors - pattern match message
   const msg = error?.message || '';
+  if (/unauthorized/i.test(msg)) return 401;
+  if (/forbidden/i.test(msg)) return 403;
   if (/not found/i.test(msg)) return 404;
+  if (/already submitted/i.test(msg)) return 400;
   if (/exceed|invalid|conflict|required|expected/i.test(msg)) return 400;
   return 500;
 }
@@ -40,7 +49,13 @@ export async function POST(req: Request) {
   } catch (error: any) {
     const status = getStatusCode(error);
     const message = error?.message || error?.toString() || 'Unknown error';
-    const code = error?.code || (status === 400 ? 'BAD_REQUEST' : status === 404 ? 'NOT_FOUND' : 'INTERNAL_SERVER_ERROR');
+    const codeFromStatus =
+      status === 400 ? 'BAD_REQUEST'
+      : status === 401 ? 'UNAUTHORIZED'
+      : status === 403 ? 'FORBIDDEN'
+      : status === 404 ? 'NOT_FOUND'
+      : 'INTERNAL_SERVER_ERROR';
+    const code = error?.code && error.code !== 'INTERNAL_SERVER_ERROR' ? error.code : codeFromStatus;
 
     // Only log unexpected errors (5xx) at error level
     if (status >= 500) {
