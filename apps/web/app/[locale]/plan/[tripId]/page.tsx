@@ -143,13 +143,12 @@ export default function PlannerPage() {
 
   // Close modal on Escape
   useEffect(() => {
+    if (!modalOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeModal();
     };
-    if (modalOpen) {
-      window.addEventListener('keydown', onKey);
-      return () => window.removeEventListener('keydown', onKey);
-    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [modalOpen]);
 
   useEffect(() => {
