@@ -361,10 +361,8 @@ export default function PlannerPage() {
                       })}
                       <button
                         onClick={() => {
-                          // Pick first experience as default for "add another"
-                          if (experiences.length > 0) {
-                            openAddModal(experiences[0], day);
-                          }
+                          const sidebar = document.getElementById('experiences-sidebar');
+                          if (sidebar) sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }}
                         className="w-full py-2 text-sm text-amber-700 hover:bg-amber-50 rounded font-medium border border-dashed border-amber-300"
                       >
