@@ -67,11 +67,27 @@ const EXPERIENCE_META: Record<string, { title: string; description: string; imag
   },
 };
 
-const SLOTS = [
+const ALL_SLOTS = [
   { value: 'MORNING', label: 'Morning (9:00 - 13:00)' },
   { value: 'AFTERNOON', label: 'Afternoon (14:00 - 18:00)' },
   { value: 'EVENING', label: 'Evening (19:00 - 23:00)' },
+  { value: 'FULL_DAY', label: 'Full Day (9:00 - 18:00)' },
 ];
+
+function getValidSlots(durationClass: string) {
+  switch (durationClass) {
+    case 'HALF_DAY':
+      return ALL_SLOTS.filter((s) => s.value === 'MORNING' || s.value === 'AFTERNOON');
+    case 'FULL_DAY':
+    case 'MULTI_DAY':
+      return ALL_SLOTS.filter((s) => s.value === 'FULL_DAY');
+    case 'EVENING':
+      return ALL_SLOTS.filter((s) => s.value === 'EVENING');
+    case 'FLEXIBLE':
+    default:
+      return ALL_SLOTS.filter((s) => s.value !== 'FULL_DAY');
+  }
+}
 
 interface Experience {
   id: string;
@@ -161,7 +177,12 @@ export default function PlannerPage() {
   const openAddModal = (exp: Experience, prefillDate?: Date) => {
     setModalExp(exp);
     setModalDate(prefillDate ? prefillDate.toISOString().split('T')[0] : '');
-    setModalSlot(exp.defaultSlot || 'MORNING');
+    // Pick correct default slot based on duration class
+    const validSlots = getValidSlots(exp.durationClass);
+    const defaultSlot = exp.defaultSlot || validSlots[0]?.value || 'MORNING';
+    // Make sure default is in valid slots list
+    const finalSlot = validSlots.find((s) => s.value === defaultSlot)?.value || validSlots[0]?.value || 'MORNING';
+    setModalSlot(finalSlot);
     setModalParticipants(Math.min(exp.minParticipants, trip?.partySize || 1));
     setModalError('');
     setModalOpen(true);
@@ -341,10 +362,15 @@ export default function PlannerPage() {
                       </button>
                     </div>
                   ) : (
-                    <div className="text-center py-6 text-neutral-500">
-                      <p className="mb-2">No experiences yet</p>
-                      <p className="text-xs">Click an experience on the right to add it to this day</p>
-                    </div>
+                    <button
+                      onClick={() => {
+                        const sidebar = document.getElementById('experiences-sidebar');
+                        if (sidebar) sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }}
+                      className="w-full py-8 text-amber-700 hover:bg-amber-50 rounded-lg font-medium border-2 border-dashed border-amber-300 hover:border-amber-500 transition"
+                    >
+                      + Add experience for this day
+                    </button>
                   )}
                 </div>
               </div>
@@ -353,7 +379,7 @@ export default function PlannerPage() {
         </div>
 
         {/* Experiences - Right */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5" id="experiences-sidebar">
           <div className="sticky top-28">
             <h2 className="text-xl font-serif font-bold text-neutral-800 mb-4">
               Available Experiences ({experiences.length})
@@ -462,7 +488,7 @@ export default function PlannerPage() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Time Slot</label>
                   <div className="grid grid-cols-1 gap-2">
-                    {SLOTS.map((slot) => (
+                    {getValidSlots(modalExp.durationClass).map((slot) => (
                       <button
                         key={slot.value}
                         type="button"
