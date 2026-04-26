@@ -145,8 +145,8 @@ export default function LandingPage() {
             <div className="hidden md:block">
               <div className="relative">
                 <img
-                  src="https://images.unsplash.com/photo-1543429776-2782fc8e1acd?w=800&auto=format&fit=crop"
-                  alt="Tuscany"
+                  src="/experiences/helicopter-flight.jpg"
+                  alt="Helicopter Flight over Tuscany"
                   className="rounded-2xl shadow-2xl"
                 />
                 <div className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-xl">
