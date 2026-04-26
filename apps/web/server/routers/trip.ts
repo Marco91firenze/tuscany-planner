@@ -9,6 +9,7 @@ const TripBaseSchema = z.object({
   partySize: z.number().min(1).max(20),
   language: z.string().default('en'),
   hotelName: z.string().optional(),
+  guestNames: z.array(z.string()).optional(),
 });
 
 // Validated create input

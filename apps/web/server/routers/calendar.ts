@@ -11,6 +11,7 @@ const AddItemInput = z.object({
   date: z.string().pipe(z.coerce.date()),
   slot: SlotEnum,
   participants: z.number().min(1),
+  participantNames: z.array(z.string()).default([]),
 });
 
 export const calendarRouter = router({
@@ -36,8 +37,12 @@ export const calendarRouter = router({
 
     return prisma.itineraryItem.create({
       data: {
-        ...input,
+        tripId: input.tripId,
+        experienceId: input.experienceId,
         date: new Date(input.date),
+        slot: input.slot,
+        participants: input.participants,
+        participantNames: input.participantNames,
       },
       include: { experience: true },
     });
