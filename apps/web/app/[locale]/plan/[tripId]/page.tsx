@@ -149,6 +149,14 @@ export default function PlannerPage() {
   const [modalSubmitting, setModalSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string>('');
 
+  // Conflict state (shown when guest already booked overlapping slot)
+  const [conflict, setConflict] = useState<{
+    conflictingItemId: string;
+    conflictingExperienceSlug: string;
+    conflictingSlot: string;
+    conflictingGuestNames: string[];
+  } | null>(null);
+
   const refreshTrip = useCallback(async () => {
     try {
       const res = await fetch('/api/trpc/trip.get', {
@@ -273,6 +281,7 @@ export default function PlannerPage() {
     setModalOpen(false);
     setModalExp(null);
     setModalError('');
+    setConflict(null);
   };
 
   const toggleGuestInModal = (name: string) => {
@@ -281,7 +290,7 @@ export default function PlannerPage() {
     );
   };
 
-  const submitAddItem = async () => {
+  const submitAddItem = async (replaceItemId?: string) => {
     if (!modalExp || !modalDate || !modalSlot) {
       setModalError('Please fill all fields');
       return;
@@ -299,6 +308,15 @@ export default function PlannerPage() {
     setModalError('');
 
     try {
+      // If replacing, remove old item first
+      if (replaceItemId) {
+        await fetch('/api/trpc/calendar.removeItem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(replaceItemId),
+        });
+      }
+
       const res = await fetch('/api/trpc/calendar.addItem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -314,8 +332,15 @@ export default function PlannerPage() {
       const data = await res.json();
 
       if (data.error) {
-        setModalError(data.error.message || 'Failed to add experience');
+        // Guest overlap conflict — show choice UI
+        if (data.error.conflict?.type === 'GUEST_OVERLAP') {
+          setConflict(data.error.conflict);
+          setModalError('');
+        } else {
+          setModalError(data.error.message || 'Failed to add experience');
+        }
       } else {
+        setConflict(null);
         closeModal();
         await refreshTrip();
       }
@@ -790,21 +815,54 @@ export default function PlannerPage() {
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={closeModal}
-                    className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg font-medium hover:bg-neutral-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={submitAddItem}
-                    disabled={modalSubmitting || !modalDate || !modalSlot || modalParticipantNames.length === 0}
-                    className="flex-1 px-4 py-2 bg-amber-700 text-white rounded-lg font-medium hover:bg-amber-800 disabled:bg-neutral-300 disabled:cursor-not-allowed"
-                  >
-                    {modalSubmitting ? 'Adding...' : 'Add to Itinerary'}
-                  </button>
-                </div>
+                {conflict && (
+                  <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-lg space-y-3">
+                    <div>
+                      <p className="font-bold text-amber-900 mb-1">⚠️ Scheduling Conflict</p>
+                      <p className="text-sm text-amber-800">
+                        <strong>{conflict.conflictingGuestNames.join(', ')}</strong> already booked in <strong>{conflict.conflictingSlot}</strong> for{' '}
+                        <strong>{EXPERIENCE_META[conflict.conflictingExperienceSlug]?.title || conflict.conflictingExperienceSlug}</strong>.
+                      </p>
+                      <p className="text-xs text-amber-700 mt-2">
+                        Each guest can only do one experience per time slot. Pick which one to keep:
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => submitAddItem(conflict.conflictingItemId)}
+                        disabled={modalSubmitting}
+                        className="px-4 py-2 bg-amber-700 text-white rounded-lg font-medium hover:bg-amber-800 disabled:opacity-50 text-sm"
+                      >
+                        {modalSubmitting ? 'Replacing...' : `Replace with ${EXPERIENCE_META[modalExp.slug]?.title || modalExp.slug}`}
+                      </button>
+                      <button
+                        onClick={() => setConflict(null)}
+                        disabled={modalSubmitting}
+                        className="px-4 py-2 bg-white border border-amber-300 text-amber-900 rounded-lg font-medium hover:bg-amber-100 disabled:opacity-50 text-sm"
+                      >
+                        Keep existing booking — change selection
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {!conflict && (
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={closeModal}
+                      className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg font-medium hover:bg-neutral-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => submitAddItem()}
+                      disabled={modalSubmitting || !modalDate || !modalSlot || modalParticipantNames.length === 0}
+                      className="flex-1 px-4 py-2 bg-amber-700 text-white rounded-lg font-medium hover:bg-amber-800 disabled:bg-neutral-300 disabled:cursor-not-allowed"
+                    >
+                      {modalSubmitting ? 'Adding...' : 'Add to Itinerary'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

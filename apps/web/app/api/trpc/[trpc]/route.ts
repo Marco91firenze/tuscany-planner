@@ -64,7 +64,15 @@ export async function POST(req: Request) {
       console.warn(`[${path}] ${status}:`, message);
     }
 
-    return Response.json({ error: { message, code } }, { status });
+    // Include extra error details (e.g. conflict info) in error payload
+    const errorPayload: any = { message, code };
+    // Walk cause chain for extra fields
+    let walker: any = error;
+    for (let i = 0; i < 5 && walker; i++) {
+      if (walker.conflict) errorPayload.conflict = walker.conflict;
+      walker = walker.cause;
+    }
+    return Response.json({ error: errorPayload }, { status });
   }
 }
 

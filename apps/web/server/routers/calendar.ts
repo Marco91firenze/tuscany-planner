@@ -1,6 +1,6 @@
 import { router, procedure } from '../trpc';
 import { prisma } from '../../lib/prisma';
-import { checkParticipantConflict, checkPerkState } from '../../lib/core';
+import { checkParticipantConflict, checkPerkState, checkGuestOverlap } from '../../lib/core';
 import { z } from 'zod';
 
 const SlotEnum = z.enum(['MORNING', 'AFTERNOON', 'EVENING', 'FULL_DAY']);
@@ -23,6 +23,31 @@ export const calendarRouter = router({
 
     if (!trip) throw new Error('Trip not found');
 
+    // Per-guest overlap (same person can't be in two overlapping experiences)
+    const itemsWithExp = await prisma.itineraryItem.findMany({
+      where: { tripId: input.tripId },
+      include: { experience: true },
+    });
+    const guestOverlap = checkGuestOverlap(
+      itemsWithExp,
+      input.date,
+      input.slot,
+      input.participantNames
+    );
+    if (guestOverlap.hasConflict) {
+      const e: any = new Error(guestOverlap.reason || 'Guest already booked in overlapping slot');
+      e.code = 'BAD_REQUEST';
+      e.conflict = {
+        type: 'GUEST_OVERLAP',
+        conflictingItemId: guestOverlap.conflictingItemId,
+        conflictingExperienceSlug: guestOverlap.conflictingExperienceSlug,
+        conflictingSlot: guestOverlap.conflictingSlot,
+        conflictingGuestNames: guestOverlap.conflictingGuestNames,
+      };
+      throw e;
+    }
+
+    // Party-size conflict (parallel tracks must fit within partySize)
     const conflict = checkParticipantConflict(
       trip.items,
       input.date,
